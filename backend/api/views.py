@@ -1,5 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from .models import Ingredient, Tag, Recipe, Subscription
 from .serializers import (IngredientSerializer, TagSerializer,
                           RecipeSerializer, RecipePostSerializer,
@@ -52,7 +53,7 @@ class RecipePagination(PageNumberPagination):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (filters.DjangoFilterBackend,
                        rest_filters.OrderingFilter)
     filterset_class = RecipeFilter
@@ -66,6 +67,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    @action(methods=['GET'], detail=True, permission_classes=(AllowAny,))
+    def get_recipe(self, request, pk=None):
+        recipe = self.get_object()
+        serializer = RecipeSerializer(recipe, context={'request': request})
+        return Response(serializer.data)
 
 
 @action(methods=['POST', 'DELETE'], detail=True,
@@ -124,8 +131,7 @@ def download_shopping_cart(self, request):
             else:
                 ingredients[item.ingredient.name] = {
                     'amount': item.amount,
-                    'unit': item.ingredient.measurement_unit
-                }
+                    'unit': item.ingredient.measurement_unit}
 
     result = ''
     for key, value in ingredients.items():
@@ -168,14 +174,37 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,))
     def set_avatar(self, request, pk=None):
         user = self.get_object()
-        serializer = UserSerializer(user, data=request.data,
-                                    partial=True, context={'request': request})
+        serializer = UserSerializer(user, data=request.data, partial=True,
+                                    context={'request': request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['GET'], detail=True,
+            permission_classes=(IsAuthenticated,))
+    def recipes(self, request, pk=None):
+        user = self.get_object()
+        recipes = Recipe.objects.filter(author=user)
+        paginator = RecipePagination()
+        result_page = paginator.paginate_queryset(recipes, request)
+        serializer = RecipeSerializer(result_page, many=True,
+                                      context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     permission_classes = (IsAuthenticated,)
+
+    @action(methods=['GET'], detail=False,
+            permission_classes=(IsAuthenticated,))
+    def recipes(self, request):
+        user = request.user
+        authors = user.subscriber.all().values_list('author', flat=True)
+        recipes = Recipe.objects.filter(author__in=authors)
+        paginator = RecipePagination()
+        result_page = paginator.paginate_queryset(recipes, request)
+        serializer = RecipeSerializer(result_page, many=True,
+                                      context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
