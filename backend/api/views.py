@@ -74,73 +74,72 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = RecipeSerializer(recipe, context={'request': request})
         return Response(serializer.data)
 
-
-@action(methods=['POST', 'DELETE'], detail=True,
-        permission_classes=(IsAuthenticated,))
-def favorite(self, request, pk=None):
-    user = request.user
-    recipe = self.get_object()
-    if request.method == 'POST':
-        if user.favorites.filter(recipe=recipe).exists():
-            return Response({'errors': 'Рецепт уже в избранном'},
+    @action(methods=['POST', 'DELETE'], detail=True,
+            permission_classes=(IsAuthenticated,))
+    def favorite(self, request, pk=None):
+        user = request.user
+        recipe = self.get_object()
+        if request.method == 'POST':
+            if user.favorites.filter(recipe=recipe).exists():
+                return Response({'errors': 'Рецепт уже в избранном'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            user.favorites.create(recipe=recipe)
+            return Response({'message': 'Рецепт добавлен в избранное'},
+                            status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            if user.favorites.filter(recipe=recipe).exists():
+                user.favorites.filter(recipe=recipe).delete()
+                return Response({'message': 'Рецепт удалён из избранного'},
+                                status=status.HTTP_204_NO_CONTENT)
+            return Response({'errors': 'Рецепт не был добавлен в избранное'},
                             status=status.HTTP_400_BAD_REQUEST)
-        user.favorites.create(recipe=recipe)
-        return Response({'message': 'Рецепт добавлен в избранное'},
-                        status=status.HTTP_201_CREATED)
-    if request.method == 'DELETE':
-        if user.favorites.filter(recipe=recipe).exists():
-            user.favorites.filter(recipe=recipe).delete()
-            return Response({'message': 'Рецепт удалён из избранного'},
-                            status=status.HTTP_204_NO_CONTENT)
-        return Response({'errors': 'Рецепт не был добавлен в избранное'},
-                        status=status.HTTP_400_BAD_REQUEST)
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @action(methods=['POST', 'DELETE'], detail=True,
+            permission_classes=(IsAuthenticated,))
+    def shopping_cart(self, request, pk=None):
+        user = request.user
+        recipe = self.get_object()
+        if request.method == 'POST':
+            if user.shopping_cart.filter(recipe=recipe).exists():
+                return Response({'errors': 'Рецепт уже в списке покупок'},
+                                status=status.HTTP_400_BAD_REQUEST)
+            user.shopping_cart.create(recipe=recipe)
+            return Response({'message': 'Рецепт добавлен в список покупок'},
+                            status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            if user.shopping_cart.filter(recipe=recipe).exists():
+                user.shopping_cart.filter(recipe=recipe).delete()
+                return Response({'message': 'Рецепт удалён из списка покупок'},
+                                status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                {'errors': 'Рецепт не был добавлен в список покупок'},
+                status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-@action(methods=['POST', 'DELETE'], detail=True,
-        permission_classes=(IsAuthenticated,))
-def shopping_cart(self, request, pk=None):
-    user = request.user
-    recipe = self.get_object()
-    if request.method == 'POST':
-        if user.shopping_cart.filter(recipe=recipe).exists():
-            return Response({'errors': 'Рецепт уже в списке покупок'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        user.shopping_cart.create(recipe=recipe)
-        return Response({'message': 'Рецепт добавлен в список покупок'},
-                        status=status.HTTP_201_CREATED)
-    if request.method == 'DELETE':
-        if user.shopping_cart.filter(recipe=recipe).exists():
-            user.shopping_cart.filter(recipe=recipe).delete()
-            return Response({'message': 'Рецепт удалён из списка покупок'},
-                            status=status.HTTP_204_NO_CONTENT)
-        return Response({'errors': 'Рецепт не был добавлен в список покупок'},
-                        status=status.HTTP_400_BAD_REQUEST)
-    return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    @action(methods=['GET'], detail=False,
+            permission_classes=(IsAuthenticated,))
+    def download_shopping_cart(self, request):
+        user = request.user
+        ingredients = {}
+        recipes = user.shopping_cart.all()
+        for recipe in recipes:
+            for item in recipe.recipe.recipeingredient_set.all():
+                if item.ingredient.name in ingredients:
+                    ingredients[item.ingredient.name]['amount'] += item.amount
+                else:
+                    ingredients[item.ingredient.name] = {
+                        'amount': item.amount,
+                        'unit': item.ingredient.measurement_unit}
 
-
-@action(methods=['GET'], detail=False, permission_classes=(IsAuthenticated,))
-def download_shopping_cart(self, request):
-    user = request.user
-    ingredients = {}
-    recipes = user.shopping_cart.all()
-    for recipe in recipes:
-        for item in recipe.recipe.recipeingredient_set.all():
-            if item.ingredient.name in ingredients:
-                ingredients[item.ingredient.name]['amount'] += item.amount
-            else:
-                ingredients[item.ingredient.name] = {
-                    'amount': item.amount,
-                    'unit': item.ingredient.measurement_unit}
-
-    result = ''
-    for key, value in ingredients.items():
-        result += f'{key} {value["amount"]} {value["unit"]}\n'
-    response = Response(result, content_type='text/plain',
-                        status=status.HTTP_200_OK)
-    response[
-        'Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
-    return response
+        result = ''
+        for key, value in ingredients.items():
+            result += f'{key} {value["amount"]} {value["unit"]}\n'
+        response = Response(result, content_type='text/plain',
+                            status=status.HTTP_200_OK)
+        response[
+            'Content-Disposition'] = 'attachment; filename="shopping_cart.txt"'
+        return response
 
 
 class UserViewSet(viewsets.ModelViewSet):
