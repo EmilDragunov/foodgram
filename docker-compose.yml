@@ -6,9 +6,15 @@ volumes:
 services:
   db:
     image: postgres:13
+    container_name: postgres_container
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   frontend:
     build: ./frontend/
     env_file: .env
@@ -19,7 +25,8 @@ services:
     build: ./backend/
     env_file: .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - static:/backend_static
       - media:/app/media
@@ -33,7 +40,7 @@ services:
     build: ./nginx/
     env_file: .env
     ports:
-      - 80:80
+      - 8000:80
     volumes:
       - static:/static
       - media:/media
