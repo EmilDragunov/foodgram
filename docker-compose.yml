@@ -11,7 +11,7 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB -h $DB_HOST -p $DB_PORT"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -31,10 +31,9 @@ services:
       - static:/backend_static
       - media:/app/media
     command: >
-      sh -c "python manage.py makemigrations &&
-      python manage.py migrate &&
-      python manage.py collectstatic --noinput &&
-      cp -r /app/collected_static/. /backend_static/static/ &&
+      sh -c "python manage.py migrate &&
+      python manage.py collectstatic &&
+      cp: -r /app/collected_static/. /backend_static/static/ &&
       gunicorn --bind 0.0.0.0:8000 foodgram_backend.wsgi"
   gateway:
     build: ./nginx/
