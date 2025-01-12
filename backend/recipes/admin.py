@@ -1,3 +1,4 @@
+"""Админ-зона рецептов."""
 from django.contrib import admin
 from recipes.models import (
     ShoppingCart, Favorite, Ingredient, Recipe, RecipeIngredient, Tag
