@@ -6,15 +6,9 @@ volumes:
 services:
   db:
     image: postgres:13
-    container_name: postgres_container
     env_file: .env
     volumes:
       - pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB -h $DB_HOST -p $DB_PORT"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
   frontend:
     build: ./frontend/
     env_file: .env
@@ -25,23 +19,23 @@ services:
     build: ./backend/
     env_file: .env
     depends_on:
-      db:
-        condition: service_healthy
+      - db
     volumes:
       - static:/backend_static
       - media:/app/media
     command: >
-      sh -c "python manage.py migrate &&
-      python manage.py collectstatic &&
-      cp: -r /app/collected_static/. /backend_static/static/ &&
-      gunicorn --bind 0.0.0.0:8000 foodgram_backend.wsgi"
+      sh -c "python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py collectstatic --noinput &&
+      cp -r /app/collected_static/. /backend_static/static/ &&
+      gunicorn --bind 0.0.0.0:8080 foodgram_backend.wsgi"
   gateway:
     build: ./nginx/
     env_file: .env
     depends_on: 
       - backend
     ports:
-      - 8000:80
+      - 8080:80
     volumes:
       - static:/static
       - media:/media
