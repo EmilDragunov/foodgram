@@ -1,7 +1,8 @@
+"""Модели рецептов."""
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
-from foodgram_backend.settings import MAX_LENGT_USERNAME
+from foodgram_backend.settings import MAX_LENGTH_USERNAME
 import uuid
 
 User = get_user_model()
@@ -26,7 +27,7 @@ class Ingredient(models.Model):
     """Ингредиент."""
 
     name = models.CharField(
-        max_length=MAX_LENGT_USERNAME,
+        max_length=MAX_LENGTH_USERNAME,
         unique=True,
         verbose_name='Название'
     )
@@ -57,7 +58,7 @@ class Tag(models.Model):
     """Тег."""
 
     name = models.CharField(
-        max_length=MAX_LENGT_USERNAME,
+        max_length=MAX_LENGTH_USERNAME,
         unique=True,
         verbose_name='Название'
     )
@@ -86,7 +87,7 @@ class Recipe(models.Model):
     """Рецепт."""
 
     name = models.CharField(
-        max_length=MAX_LENGT_USERNAME,
+        max_length=MAX_LENGTH_USERNAME,
         verbose_name='Название'
     )
     author = models.ForeignKey(

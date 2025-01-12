@@ -1,11 +1,14 @@
-import os
+"""Настройки."""
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
-MAX_LENGT_USERNAME = 150
+MAX_LENGTH_USERNAME = 150
+
+MAX_LENGTH_EMAIL = 254
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
