@@ -48,11 +48,11 @@ class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для списка рецептов."""
 
     author = UserSerializer(read_only=True)
-    ingredients = RecipeIngredientSerializer(many=True,
-                                             source='recipeingredient_set')
+    ingredients = serializers.SerializerMethodField(read_only=True)
     tags = TagSerializer(many=True)
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    image = serializers.ImageField()
 
     class Meta:
         """Мета."""
@@ -63,16 +63,24 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_favorited', 'is_in_shopping_cart')
 
     def get_is_favorited(self, obj):
+        """Получение избранного."""
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
         return user.favorites.filter(recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
+        """Получение списка покупок."""
         user = self.context.get('request').user
         if user.is_anonymous:
             return False
         return user.shopping_cart.filter(recipe=obj).exists()
+
+    def get_ingredients(self, obj):
+        """Получение ингредиентов."""
+        result = obj.recipeingredients.all()
+        return RecipeIngredientSerializer(result, many=True).data
+
 
 
 
