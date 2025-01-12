@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+MAX_LENGT_USERNAME = 150
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-bb5&e-3hl!7@9!8qr!)7852i7mw9jmn3ckv1wsmoh0)t%3gw)='

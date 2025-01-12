@@ -27,7 +27,7 @@ class RecipeIngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'favorites_count')  # Исправлено: теперь ссылаемся на метод
+    list_display = ('name', 'author', 'favorites_count')
     search_fields = ('author__username', 'name', 'tags__name')
     filter_horizontal = ('tags',)
     list_filter = ('tags', 'author')
