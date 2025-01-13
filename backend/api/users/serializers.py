@@ -7,7 +7,6 @@ from users.models import Follow
 from .validators import validate_username
 from django.core.files.base import ContentFile
 import base64
-from drf_extra_fields.fields import Base64ImageField
 
 
 User = get_user_model()
