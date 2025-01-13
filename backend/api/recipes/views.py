@@ -48,7 +48,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, IsOwner)
     filter_backends = (DjangoFilterBackend)
     filterset_class = RecipeFilter
-    ordering_fields = ('name', 'pub_date')
 
     def get_queryset(self):
         return Recipe.objects.all().select_related(

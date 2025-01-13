@@ -5,20 +5,52 @@ from recipes.models import (
 
 
 class RecipeFilter(filters.FilterSet):
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
-    is_favorited = filters.BooleanFilter(method='filter_is_favorited')
-    author = filters.NumberFilter(field_name='author__id')
+    """Фильтр для рецептов"""
+    is_favorited = filters.ChoiceFilter(
+        method='filter',
+        choices=[('1', 'Yes'), ('0', 'No')],
+        label='Is Favorited'
+    )
+    is_in_shopping_cart = filters.ChoiceFilter(
+        method='filter',
+        choices=[('1', 'Yes'), ('0', 'No')],
+        label='Is in Shopping Cart'
+    )
+    tags = filters.ModelMultipleChoiceFilter(
+        queryset=Tag.objects.all(),
+        field_name='tags__slug',
+        to_field_name='slug',
+        label='Теги'
+    )
 
     class Meta:
         model = Recipe
-        fields = ('tags', 'is_favorited', 'author')
+        fields = ['author']
 
-    def filter_is_favorited(self, queryset, name, value):
+    def filter(self, queryset, name, value):
+        """Фильтр избраное и список покупок"""
+        if value == '1':
+            value = True
+        elif value == '0':
+            value = False
+        else:
+            return queryset
+
+        if name == 'is_favorited':
+            model = Favorite
+        elif name == 'is_in_shopping_cart':
+            model = ShoppingCart
+
+        if not self.request.user.is_authenticated:
+            return queryset
+
+        result = model.objects.filter(
+            user=self.request.user).values('recipe')
         if value:
-            user = self.request.user
-            return queryset.filter(favorites__user=user)
-        return queryset
-    
+            return queryset.filter(id__in=result)
+        else:
+            return queryset.exclude(id__in=result)
+
 
 class IngredientFilter(filters.FilterSet):
     """Фильтр для ингридиентов"""
