@@ -19,13 +19,14 @@ class UserProfileAdmin(UserAdmin):
 
     @admin.display(description='Аватар')
     def image_preview(self, obj):
-        """Показывать миниатюру изображения"""
+        """Показывать миниатюру изображения."""
         if obj.avatar:
             return mark_safe(
                 f'<img src="{obj.avatar.url}" alt="Image" '
                 f'style="max-height: 100px; max-width: 100px;"/>'
             )
         return 'Нет изображения'
+
 
 @admin.register(Follow)
 class FollowAdmin(admin.ModelAdmin):
