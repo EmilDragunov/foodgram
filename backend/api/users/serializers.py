@@ -5,8 +5,7 @@ from rest_framework.validators import UniqueValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
 from users.models import Follow
 from .validators import validate_username
-from django.core.files.base import ContentFile
-import base64
+from drf_extra_fields.fields import Base64ImageField
 
 
 User = get_user_model()
@@ -76,7 +75,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class UserAvatarSerializer(serializers.ModelSerializer):
     """Сериализатор для аватара пользователя."""
 
-    avatar = serializers.ImageField()
+    avatar = Base64ImageField()
 
     class Meta:
         """Мета."""
@@ -90,14 +89,6 @@ class UserAvatarSerializer(serializers.ModelSerializer):
                 {'avatar': 'Является обязательным полем.'}
             )
         return attrs
-
-    def to_internal_value(self, data):
-        """Преобразует Base64 строку в ContentFile."""
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-        return super().to_internal_value(data)
 
 
 class FollowSerializer(serializers.ModelSerializer):
