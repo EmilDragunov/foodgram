@@ -23,7 +23,7 @@ User = get_user_model()
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Ингредиенты."""
+    """ViewSet для ингредиентов."""
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -34,7 +34,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class TagViewSet(viewsets.ModelViewSet):
-    """Теги."""
+    """ViewSet для тегов."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -43,7 +43,8 @@ class TagViewSet(viewsets.ModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Рецепты"""
+    """ViewSet для рецептов."""
+
     serializer_class = RecipeSerializer
     pagination_class = RecipePagination
     http_method_names = ['get', 'post', 'patch', 'delete']
@@ -52,22 +53,25 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_queryset(self):
+        """Получает queryset рецептов."""
         return Recipe.objects.all().select_related(
             'author').prefetch_related('tags', 'ingredients')
 
     def get_serializer_class(self):
+        """Определяет сериализатор на основе действия."""
         if self.action in ['list', 'retrieve']:
             return RecipeSerializer
         return AddRecipeSerializer
 
     def perform_create(self, serializer):
+        """Сохраняет автора рецепта."""
         serializer.save(author=self.request.user)
 
     @action(
-        detail=True, methods=['post'], url_path='favorite',
+        detail=True, methods=['POST'], url_path='favorite',
         permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
-        """Добавление в избраное"""
+        """Добавляет рецепт в избранное."""
         return add_method(
             model=Recipe,
             request=request,
@@ -79,16 +83,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @favorite.mapping.delete
     def favorite_delete(self, request, pk=None):
-        """Удаление из избраного"""
+        """Удаляет рецепт из избранного."""
         result = get_object_or_404(Recipe, pk=pk)
         favorite = result.favorites.filter(user=request.user)
         return remove_method(favorite)
 
     @action(
-        detail=True, methods=['get'], url_path='get-link',
+        detail=True, methods=['GET'], url_path='get-link',
         permission_classes=[AllowAny])
     def get_link(self, request, pk=None):
-        """Получение короткой ссылки"""
+        """Возвращает короткую ссылку на рецепт."""
         result = get_object_or_404(Recipe, pk=pk)
         return Response(
             {"short-link": request.build_absolute_uri(f"/s/{result.link}/")},
@@ -96,10 +100,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @action(
-        detail=True, methods=['post'], url_path='shopping_cart',
+        detail=True, methods=['POST'], url_path='shopping_cart',
         permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
-        """Добавление в список покупок"""
+        """Добавляет рецепт в список покупок."""
         return add_method(
             model=Recipe,
             request=request,
@@ -111,16 +115,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @shopping_cart.mapping.delete
     def shopping_cart_delete(self, request, pk=None):
-        """Удаление из списка покупок"""
+        """Удаляет рецепт из списка покупок."""
         result = get_object_or_404(Recipe, pk=pk)
         basket = result.shoppingcarts.filter(user=request.user)
         return remove_method(basket)
 
     @action(
-        detail=False, methods=['get'], url_path='download_shopping_cart',
+        detail=False, methods=['GET'], url_path='download_shopping_cart',
         permission_classes=[IsAuthenticated])
     def download_basket(self, request):
-        """Получение файла списка покупок"""
+        """Скачивает список покупок."""
         basket = request.user.shoppingcarts.all()
         ingredients = {}
 

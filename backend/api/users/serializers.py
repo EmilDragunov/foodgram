@@ -152,7 +152,7 @@ class CustomAddFollowSerializer(serializers.ModelSerializer):
         fields = 'subscribed_to', 'user'
 
     def __init__(self, *args, **kwargs):
-        """Инит."""
+        """Инициализация."""
         self.Meta.model = kwargs.pop('model')
         super().__init__(*args, **kwargs)
 

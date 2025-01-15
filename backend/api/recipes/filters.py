@@ -9,13 +9,13 @@ class RecipeFilter(django_filters.FilterSet):
 
     is_favorited = django_filters.ChoiceFilter(
         method='filter',
-        choices=[('1', 'Yes'), ('0', 'No')],
-        label='Is Favorited'
+        choices=[('1', 'Да'), ('0', 'Нет')],
+        label='В избранном'
     )
     is_in_shopping_cart = django_filters.ChoiceFilter(
         method='filter',
-        choices=[('1', 'Yes'), ('0', 'No')],
-        label='Is in Shopping Cart'
+        choices=[('1', 'Да'), ('0', 'Нет')],
+        label='В списке покупок'
     )
     tags = django_filters.ModelMultipleChoiceFilter(
         queryset=Tag.objects.all(),
@@ -31,7 +31,7 @@ class RecipeFilter(django_filters.FilterSet):
         fields = ['author']
 
     def filter(self, queryset, name, value):
-        """Фильтр избраное и список покупок."""
+        """Фильтр для избранного и списка покупок."""
         if value == '1':
             value = True
         elif value == '0':
