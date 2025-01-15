@@ -3,6 +3,7 @@ from django.contrib import admin
 from recipes.models import (
     ShoppingCart, Favorite, Ingredient, Recipe, RecipeIngredient, Tag
 )
+from django.utils.html import format_html
 
 
 @admin.register(Ingredient)
@@ -42,7 +43,7 @@ class RecipeIngredientAdmin(admin.ModelAdmin):
 class RecipeAdmin(admin.ModelAdmin):
     """Рецепт."""
 
-    list_display = ('name', 'author', 'favorites_count')
+    list_display = ('name', 'author', 'favorites_count', 'image_preview')
     search_fields = ('author__username', 'name', 'tags__name')
     filter_horizontal = ('tags',)
     list_filter = ('tags', 'author')
@@ -52,6 +53,17 @@ class RecipeAdmin(admin.ModelAdmin):
     def favorites_count(self, obj):
         """В избранном."""
         return obj.favorites.count()
+
+    @admin.display(description='Картинка рецепта')
+    def image_preview(self, obj):
+        """Отображает картинку рецепта."""
+        if obj.image:
+            return format_html(
+                '<img src="{}" alt="Image" '
+                'style="max-height: 100px; max-width: 100px;"/>',
+                obj.image.url
+            )
+        return 'Нет изображения'
 
 
 @admin.register(Favorite)

@@ -17,7 +17,7 @@ class PublishedModel(models.Model):
         'Recipe', on_delete=models.CASCADE, verbose_name='Рецепт')
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         abstract = True
         ordering = ('user',)
@@ -37,7 +37,7 @@ class Ingredient(models.Model):
     )
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
@@ -72,7 +72,7 @@ class Tag(models.Model):
     )
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
@@ -120,7 +120,7 @@ class Recipe(models.Model):
             self.link = uuid.uuid4().hex[:5]
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
@@ -152,7 +152,7 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         verbose_name = 'Количество ингредиента'
         verbose_name_plural = 'Количество ингредиентов'
@@ -173,7 +173,7 @@ class Favorite(PublishedModel):
     """Избранные рецепты."""
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
@@ -192,7 +192,7 @@ class ShoppingCart(PublishedModel):
     """Список покупок."""
 
     class Meta:
-        """Перевод модели."""
+        """Мета данные."""
 
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Списки покупок'

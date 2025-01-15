@@ -5,7 +5,8 @@ from recipes.models import (
 
 
 class RecipeFilter(django_filters.FilterSet):
-    """Фильтр для рецептов"""
+    """Фильтр для рецептов."""
+
     is_favorited = django_filters.ChoiceFilter(
         method='filter',
         choices=[('1', 'Yes'), ('0', 'No')],
@@ -24,11 +25,13 @@ class RecipeFilter(django_filters.FilterSet):
     )
 
     class Meta:
+        """Мета данные."""
+
         model = Recipe
         fields = ['author']
 
     def filter(self, queryset, name, value):
-        """Фильтр избраное и список покупок"""
+        """Фильтр избраное и список покупок."""
         if value == '1':
             value = True
         elif value == '0':
@@ -50,12 +53,15 @@ class RecipeFilter(django_filters.FilterSet):
             return queryset.filter(id__in=result)
         else:
             return queryset.exclude(id__in=result)
-    
+
 
 class IngredientFilter(django_filters.FilterSet):
-    """Фильтр для ингридиентов"""
+    """Фильтр для ингридиентов."""
+
     name = django_filters.CharFilter(lookup_expr='icontains')
 
     class Meta:
+        """Мета данные."""
+
         model = Ingredient
         fields = ['name']

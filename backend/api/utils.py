@@ -5,10 +5,10 @@ from recipes.models import RecipeIngredient
 
 
 def add_method(
-    model, request, pk, serializer_class, related_field,
-    model_serializer
+    model, request, pk, serializer_class,
+    related_field, model_serializer
 ):
-    """Добавление в базу"""
+    """Добавление в базу."""
     result = get_object_or_404(model, pk=pk)
     data = {
         'user': request.user.id,
