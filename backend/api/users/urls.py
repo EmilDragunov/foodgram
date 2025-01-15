@@ -2,11 +2,11 @@
 from django.urls import include, path
 from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
-from .views import UsersViewSet
+from .views import CustomUsersViewSet
 
 router = DefaultRouter()
 router.register(
-    r'users', UsersViewSet, basename='users')
+    r'users', CustomUsersViewSet, basename='users')
 
 urlpatterns = [
     path('users/set_password/', UserViewSet.as_view({'post': 'set_password'})),

@@ -1,4 +1,4 @@
-"""Вьюсеты для пользователей."""
+"""Вьюсеты для работы с пользователями."""
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django.db.models import Count
@@ -10,38 +10,40 @@ from rest_framework.decorators import action
 from api.utils import add_method, remove_method
 from api.pagination import RecipePagination
 from .serializers import (
-    UserSerializer, RegistrationSerializer, UserAvatarSerializer,
-    FollowSerializer, AddFollowSerializer)
-from users.models import Follow
-
+    CustomUserSerializer, UserRegistrationSerializer,
+    UserAvatarSerializer, SubscriptionSerializer, CustomAddFollowSerializer
+)
+from users.models import Subscription
 
 User = get_user_model()
 
 
-class UsersViewSet(viewsets.ModelViewSet):
-    """Пользователи"""
+class CustomUsersViewSet(viewsets.ModelViewSet):
+    """ViewSet для пользователей."""
+
     queryset = User.objects.all()
     permission_classes = [AllowAny]
     pagination_class = RecipePagination
 
     def get_serializer_class(self):
+        """Определяет класс сериализатора на основе действия."""
         if self.action == 'create':
-            return RegistrationSerializer
-        return UserSerializer
+            return UserRegistrationSerializer
+        return CustomUserSerializer
 
     @action(
-        detail=False, methods=['get'], url_path='me',
+        detail=False, methods=['GET'], url_path='me',
         permission_classes=[IsAuthenticated])
-    def user_information(self, request):
-        """users/me"""
+    def user_info(self, request):
+        """Получение информации о текущем пользователе."""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
 
     @action(
-        detail=False, methods=['put'], url_path='me/avatar',
+        detail=False, methods=['PUT'], url_path='me/avatar',
         permission_classes=[IsAuthenticated])
-    def avatar(self, request):
-        """Добавить аватар пользователя"""
+    def upload_avatar(self, request):
+        """Загрузка аватара пользователя."""
         user = request.user
         serializer = UserAvatarSerializer(
             user, data=request.data, partial=True)
@@ -49,9 +51,9 @@ class UsersViewSet(viewsets.ModelViewSet):
         serializer.save()
         return Response({'avatar': user.avatar.url})
 
-    @avatar.mapping.delete
-    def avatar_delete(self, request):
-        """Удалить аватар пользователя"""
+    @upload_avatar.mapping.delete
+    def delete_avatar(self, request):
+        """Удаление аватара пользователя."""
         user = request.user
         user.avatar.delete()
         return Response(
@@ -59,35 +61,38 @@ class UsersViewSet(viewsets.ModelViewSet):
             status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        detail=False, methods=['get'], url_path='subscriptions',
+        detail=False, methods=['GET'], url_path='subscriptions',
         permission_classes=[IsAuthenticated])
-    def user_follow(self, request):
-        """Список подписок"""
-        follows = request.user.follower.annotate(
-            recipes_count=Count('following__recipes'))
+    def user_subscription(self, request):
+        """Получение списка подписок пользователя."""
+        subscribers = request.user.subscriber.annotate(
+            recipes_count=Count('subscribed_to__recipes'))
         paginator = self.pagination_class()
-        paginated_follows = paginator.paginate_queryset(follows, request)
-        serializer = FollowSerializer(
-            paginated_follows, many=True, context={'request': request})
+        paginated_subscribers = paginator.paginate_queryset(
+            subscribers, request)
+        serializer = SubscriptionSerializer(
+            paginated_subscribers, many=True, context={'request': request}
+        )
         return paginator.get_paginated_response(serializer.data)
 
     @action(
-        detail=True, methods=['post'], url_path='subscribe',
+        detail=True, methods=['POST'], url_path='subscribe',
         permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk=None):
-        """Подписаться на пользователя"""
+        """Подписка на пользователя."""
         return add_method(
             model=User,
             request=request,
             pk=pk,
-            serializer_class=AddFollowSerializer,
-            related_field='following',
-            model_serializer=Follow
+            serializer_class=CustomAddFollowSerializer,
+            related_field='subscribed_to',
+            model_serializer=Subscription
         )
 
     @subscribe.mapping.delete
     def subscribe_delete(self, request, pk=None):
-        """Отписаться от пользователя"""
-        result = get_object_or_404(User, pk=pk)
-        follow = request.user.follower.filter(following=result)
-        return remove_method(follow)
+        """Отписка от пользователя."""
+        user_to_unsubscribe = get_object_or_404(User, pk=pk)
+        subscription = request.user.subscriber.filter(
+            subscribed_to=user_to_unsubscribe)
+        return remove_method(subscription)
