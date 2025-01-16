@@ -32,8 +32,6 @@ services:
   gateway:
     image: emildragunov/foodgram-gateway
     env_file: .env
-    depends_on:
-      - backend
     ports:
       - 8080:80
     volumes:

@@ -121,4 +121,3 @@ jobs:
           echo "готово"
           echo "Очищаем кеш в докерах"
           sudo docker system prune -af
-
