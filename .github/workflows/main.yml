@@ -61,3 +61,24 @@ jobs:
           context: ./frontend/
           push: true
           tags: emildragunov/foodgram-frontend:latest
+  push_to_dockerhub_nginx:
+    name: Отправка образа nginx на DockerHub
+    runs-on: ubuntu-latest
+    needs:
+      - backend_tests
+    steps:
+      - name: Получение исходного кода из репозитория
+        uses: actions/checkout@v3
+      - name: Установка сборщика контейнеров Docker
+        uses: docker/setup-buildx-action@v2
+      - name: Авторизация на Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }} 
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Одновременный билд и пуш образа в Docker Hub
+        uses: docker/build-push-action@v4
+        with:
+          context: ./nginx/
+          push: true
+          tags: emildragunov/foodgram-gateway:latest
