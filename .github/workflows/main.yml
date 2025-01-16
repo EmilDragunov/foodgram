@@ -119,5 +119,4 @@ jobs:
           echo "Запуск compose в фоне"
           sudo docker compose -f docker-compose.production.yml up -d
           echo "готово"
-          echo "Очищаем мусор в докерах"
-          sudo docker system prune -af
+
