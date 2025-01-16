@@ -121,4 +121,3 @@ jobs:
           echo "готово"
           echo "Очищаем мусор в докерах"
           sudo docker system prune -af
-
