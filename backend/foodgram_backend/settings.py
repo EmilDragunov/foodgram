@@ -10,6 +10,10 @@ MAX_LENGTH_USERNAME = 150
 
 MAX_LENGTH_EMAIL = 254
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://dragunfoodgram.zapto.org',
+]
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
