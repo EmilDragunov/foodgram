@@ -110,8 +110,6 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
         script: |
           cd foodgram
-          echo "Очищаем кеш в докерах"
-          sudo docker system prune -af
           echo "Обновляем"
           sudo docker compose -f docker-compose.production.yml pull
           echo "готово"
@@ -121,4 +119,6 @@ jobs:
           echo "Запуск compose в фоне"
           sudo docker compose -f docker-compose.production.yml up -d
           echo "готово"
+          echo "Очищаем кеш в докерах"
+          sudo docker system prune -af
 
