@@ -8,12 +8,12 @@ class RecipeFilter(django_filters.FilterSet):
     """Фильтр для рецептов."""
 
     is_favorited = django_filters.ChoiceFilter(
-        method='filter',
+        method='filter_is_favorited',
         choices=[('1', 'Да'), ('0', 'Нет')],
         label='В избранном'
     )
     is_in_shopping_cart = django_filters.ChoiceFilter(
-        method='filter',
+        method='filter_is_in_shopping_cart',
         choices=[('1', 'Да'), ('0', 'Нет')],
         label='В списке покупок'
     )
