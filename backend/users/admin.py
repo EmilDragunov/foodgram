@@ -9,7 +9,7 @@ User = get_user_model()
 
 
 @admin.register(User)
-class CustomUserAdmin(UserAdmin):
+class UserProfileAdmin(UserAdmin):
     """Админ-панель для кастомной модели пользователя."""
 
     list_display = ('pk', 'username', 'display_avatar')

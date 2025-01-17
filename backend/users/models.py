@@ -5,9 +5,16 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
 
+USERNAME_REGEX = r'^[a-zA-Z0-9_]+$'
+USERNAME_VALIDATION_MESSAGE = (
+    'Имя пользователя может содержать только латинские '
+    'буквы, цифры и символ подчеркивания.'
+)
+USERNAME_VALIDATION_CODE = 'invalid_username'
+
 
 class UserProfile(AbstractUser):
-    """Кастомная модель пользователя."""
+    """Модель пользователя."""
 
     email = models.EmailField(
         unique=True, blank=True, max_length=MAX_LENGTH_EMAIL,
@@ -18,12 +25,9 @@ class UserProfile(AbstractUser):
         verbose_name='Имя пользователя',
         validators=[
             RegexValidator(
-                regex=r'^[a-zA-Z0-9_]+$',
-                message=(
-                    'Имя пользователя может содержать только латинские '
-                    'буквы, цифры и символ подчеркивания.'
-                ),
-                code='invalid_username'
+                regex=USERNAME_REGEX,
+                message=USERNAME_VALIDATION_MESSAGE,
+                code=USERNAME_VALIDATION_CODE
             )
         ]
     )
@@ -74,13 +78,12 @@ class Subscription(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'subscribed_to'],
                 name='unique_subscriber_subscription'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('subscribed_to')),
+                name='prevent_self_subscription',
             )
         ]
-
-    def clean(self):
-        """Метод для проверки."""
-        if self.user == self.subscribed_to:
-            raise ValidationError('Нельзя подписаться на самого себя.')
 
     def __str__(self):
         """Строковое отображение объекта."""

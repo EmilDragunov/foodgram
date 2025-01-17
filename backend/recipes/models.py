@@ -86,10 +86,6 @@ class Tag(models.Model):
 class Recipe(models.Model):
     """Рецепт."""
 
-    name = models.CharField(
-        max_length=MAX_LENGTH_USERNAME,
-        verbose_name='Название'
-    )
     author = models.ForeignKey(
         User, on_delete=models.CASCADE,
         verbose_name='Автор'
@@ -100,8 +96,12 @@ class Recipe(models.Model):
         through='RecipeIngredient',
         verbose_name='Ингредиенты'
     )
+    name = models.CharField(
+        max_length=MAX_LENGTH_USERNAME,
+        verbose_name='Название'
+    )
     cooking_time = models.IntegerField(
-        verbose_name='Время приготовления', help_text='в минутах',
+        verbose_name='Время приготовления',
         validators=[MinValueValidator(
             1, message='Количество должно быть больше 0')]
     )
@@ -112,12 +112,6 @@ class Recipe(models.Model):
                                     verbose_name='Дата публикации')
     image = models.ImageField(upload_to='images/', verbose_name='Картинка')
     text = models.TextField(verbose_name='Описание')
-
-    def generate_link(self):
-        """Генерация ссылки."""
-        self.link = uuid.uuid4().hex[:5]
-        while Recipe.objects.filter(link=self.link).exists():
-            self.link = uuid.uuid4().hex[:5]
 
     class Meta:
         """Мета данные."""
@@ -130,6 +124,12 @@ class Recipe(models.Model):
     def __str__(self):
         """Возвращает имя объекта в виде строки."""
         return self.name
+
+    def generate_link(self):
+        """Генерация ссылки."""
+        self.link = uuid.uuid4().hex[:5]
+        while Recipe.objects.filter(link=self.link).exists():
+            self.link = uuid.uuid4().hex[:5]
 
 
 class RecipeIngredient(models.Model):
