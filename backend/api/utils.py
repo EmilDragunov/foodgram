@@ -5,7 +5,7 @@ from rest_framework import status
 from recipes.models import RecipeIngredient
 
 
-def add_method(
+def add_to_relation(
     model, request, pk, serializer_class,
     related_field, model_serializer
 ):
@@ -21,10 +21,10 @@ def add_method(
     return Response(serializer.data)
 
 
-def remove_method(result_delet):
+def delete_relation(result_delete):
     """Метод для удаления из базы."""
-    if result_delet.exists():
-        result_delet.delete()
+    if result_delete.exists():
+        result_delete.delete()
         return Response(
             {"detail": "Успешно."},
             status=status.HTTP_200_OK)
@@ -42,11 +42,10 @@ def recipe_create_and_update(recipe, ingredients_data, tags_data):
         recipe.tags.set(tags_data)
     if ingredients_data:
         recipe.recipeingredients.all().delete()
-        ingredients_list = [
+        recipe.recipeingredients.bulk_create([
             RecipeIngredient(
                 recipe=recipe, ingredient=ingredient['id'],
                 amount=ingredient['amount']
             )
             for ingredient in ingredients_data
-        ]
-        recipe.recipeingredients.bulk_create(ingredients_list)
+        ])

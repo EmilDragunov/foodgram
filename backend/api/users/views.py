@@ -7,7 +7,7 @@ from rest_framework.permissions import (
     IsAuthenticated, AllowAny)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from api.utils import add_method, remove_method
+from api.utils import add_to_relation, delete_relation
 from api.pagination import RecipePagination
 from .serializers import (
     CustomUserSerializer, UserRegistrationSerializer,
@@ -80,7 +80,7 @@ class CustomUsersViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk=None):
         """Подписка на пользователя."""
-        return add_method(
+        return add_to_relation(
             model=User,
             request=request,
             pk=pk,
@@ -95,4 +95,4 @@ class CustomUsersViewSet(viewsets.ModelViewSet):
         user_to_unsubscribe = get_object_or_404(User, pk=pk)
         subscription = request.user.subscriber.filter(
             subscribed_to=user_to_unsubscribe)
-        return remove_method(subscription)
+        return delete_relation(subscription)

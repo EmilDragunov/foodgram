@@ -17,7 +17,7 @@ from api.permissions import IsOwner
 from django.shortcuts import get_object_or_404, redirect
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpResponse
-from api.utils import add_method, remove_method
+from api.utils import add_to_relation, delete_relation
 
 User = get_user_model()
 
@@ -72,7 +72,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated])
     def favorite(self, request, pk=None):
         """Добавляет рецепт в избранное."""
-        return add_method(
+        return add_to_relation(
             model=Recipe,
             request=request,
             pk=pk,
@@ -86,7 +86,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Удаляет рецепт из избранного."""
         result = get_object_or_404(Recipe, pk=pk)
         favorite = result.favorites.filter(user=request.user)
-        return remove_method(favorite)
+        return delete_relation(favorite)
 
     @action(
         detail=True, methods=['GET'], url_path='get-link',
@@ -104,7 +104,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk=None):
         """Добавляет рецепт в список покупок."""
-        return add_method(
+        return add_to_relation(
             model=Recipe,
             request=request,
             pk=pk,
@@ -118,7 +118,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Удаляет рецепт из списка покупок."""
         result = get_object_or_404(Recipe, pk=pk)
         basket = result.shoppingcarts.filter(user=request.user)
-        return remove_method(basket)
+        return delete_relation(basket)
 
     @action(
         detail=False, methods=['GET'], url_path='download_shopping_cart',
