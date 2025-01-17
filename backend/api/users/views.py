@@ -18,7 +18,7 @@ from users.models import Subscription
 User = get_user_model()
 
 
-class CustomUsersViewSet(viewsets.ModelViewSet):
+class UsersViewSet(viewsets.ModelViewSet):
     """ViewSet для пользователей."""
 
     queryset = User.objects.all()

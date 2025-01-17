@@ -30,29 +30,37 @@ class RecipeFilter(django_filters.FilterSet):
         model = Recipe
         fields = ['author']
 
-    def filter(self, queryset, name, value):
-        """Фильтр для избранного и списка покупок."""
+    def filter_is_favorited(self, queryset, name, value):
+        """Фильтр для избранного."""
+        if not self.request.user.is_authenticated:
+            return queryset
         if value == '1':
             value = True
         elif value == '0':
             value = False
         else:
             return queryset
-
-        if name == 'is_favorited':
-            model = Favorite
-        elif name == 'is_in_shopping_cart':
-            model = ShoppingCart
-
-        if not self.request.user.is_authenticated:
-            return queryset
-
-        result = model.objects.filter(
+        result = Favorite.objects.filter(
             user=self.request.user).values('recipe')
         if value:
             return queryset.filter(id__in=result)
+        return queryset.exclude(id__in=result)
+
+    def filter_is_in_shopping_cart(self, queryset, name, value):
+        """Фильтр для списка покупок."""
+        if not self.request.user.is_authenticated:
+            return queryset
+        if value == '1':
+            value = True
+        elif value == '0':
+            value = False
         else:
-            return queryset.exclude(id__in=result)
+            return queryset
+        result = ShoppingCart.objects.filter(
+            user=self.request.user).values('recipe')
+        if value:
+            return queryset.filter(id__in=result)
+        return queryset.exclude(id__in=result)
 
 
 class IngredientFilter(django_filters.FilterSet):
