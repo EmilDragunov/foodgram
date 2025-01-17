@@ -1,7 +1,6 @@
 """Модели для управления пользователями."""
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
 
