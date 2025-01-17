@@ -3,7 +3,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
-from users.models import Subscription, validate_username
+from users.models import Subscription
+from .validators import validate_username
 from drf_extra_fields.fields import Base64ImageField
 
 User = get_user_model()

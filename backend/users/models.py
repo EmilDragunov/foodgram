@@ -1,25 +1,15 @@
 """Модели для управления пользователями."""
-import re
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
-from django.core.exceptions import ValidationError
 
-USERNAME_PATTERN = r'^[\w.@+-]+$'
-
-
-def validate_username(value):
-    """Проверяет имя пользователя."""
-    errors = []
-    if value == 'me':
-        errors.append(
-            'Использование имени "me" в качестве username запрещено')
-    if not re.match(USERNAME_PATTERN, value):
-        errors.append(
-            'Может содержать только буквы, цифры и символы @/./+/-/_')
-    if errors:
-        raise ValidationError(errors)
-    return value
+USERNAME_REGEX = r'^[a-zA-Z0-9_]+$'
+USERNAME_VALIDATION_MESSAGE = (
+    'Имя пользователя может содержать только латинские '
+    'буквы, цифры и символ подчеркивания.'
+)
+USERNAME_VALIDATION_CODE = 'invalid_username'
 
 
 class UserProfile(AbstractUser):
@@ -32,7 +22,13 @@ class UserProfile(AbstractUser):
     username = models.CharField(
         max_length=MAX_LENGTH_USERNAME, blank=True, unique=True,
         verbose_name='Имя пользователя',
-        validators=[validate_username]
+        validators=[
+            RegexValidator(
+                regex=USERNAME_REGEX,
+                message=USERNAME_VALIDATION_MESSAGE,
+                code=USERNAME_VALIDATION_CODE
+            )
+        ]
     )
     avatar = models.ImageField(
         upload_to='users/',
