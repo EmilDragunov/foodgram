@@ -10,8 +10,8 @@ from rest_framework.decorators import action
 from api.utils import add_to_relation, delete_relation
 from api.pagination import RecipePagination
 from .serializers import (
-    CustomUserSerializer, UserRegistrationSerializer,
-    UserAvatarSerializer, SubscriptionSerializer, CustomAddFollowSerializer
+    UserSerializer, UserRegistrationSerializer,
+    UserAvatarSerializer, SubscriptionSerializer, AddFollowSerializer
 )
 from users.models import Subscription
 
@@ -29,7 +29,7 @@ class CustomUsersViewSet(viewsets.ModelViewSet):
         """Определяет класс сериализатора на основе действия."""
         if self.action == 'create':
             return UserRegistrationSerializer
-        return CustomUserSerializer
+        return UserSerializer
 
     @action(
         detail=False, methods=['GET'], url_path='me',
@@ -84,7 +84,7 @@ class CustomUsersViewSet(viewsets.ModelViewSet):
             model=User,
             request=request,
             pk=pk,
-            serializer_class=CustomAddFollowSerializer,
+            serializer_class=AddFollowSerializer,
             related_field='subscribed_to',
             model_serializer=Subscription
         )

@@ -3,14 +3,13 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
-from users.models import Subscription
-from .validators import custom_validate_username
+from users.models import Subscription, validate_username
 from drf_extra_fields.fields import Base64ImageField
 
 User = get_user_model()
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для базовой информации о пользователе."""
 
     is_subscribed = serializers.SerializerMethodField(read_only=True)
@@ -46,7 +45,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validators=[UniqueValidator(
             queryset=User.objects.all(),
             message="Это имя пользователя уже занято"),
-            custom_validate_username]
+            validate_username]
     )
     first_name = serializers.CharField(
         required=True, max_length=MAX_LENGTH_USERNAME,
@@ -142,7 +141,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return None
 
 
-class CustomAddFollowSerializer(serializers.ModelSerializer):
+class AddFollowSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления подписок."""
 
     class Meta:

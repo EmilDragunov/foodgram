@@ -2,7 +2,7 @@
 from rest_framework import serializers
 from recipes.models import Ingredient, Tag, Recipe, RecipeIngredient
 from django.contrib.auth import get_user_model
-from api.users.serializers import CustomUserSerializer
+from api.users.serializers import UserSerializer
 from api.utils import recipe_create_and_update
 from drf_extra_fields.fields import Base64ImageField
 
@@ -49,7 +49,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для списка рецептов."""
 
-    author = CustomUserSerializer(read_only=True)
+    author = UserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField(read_only=True)
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
