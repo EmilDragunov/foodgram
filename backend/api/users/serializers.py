@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
 from users.models import Subscription
+from .validators import validate_username
 from drf_extra_fields.fields import Base64ImageField
 
 User = get_user_model()
@@ -44,7 +45,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         required=True,
         validators=[UniqueValidator(
             queryset=User.objects.all(),
-            message="Это имя пользователя уже занято"),]
+            message="Это имя пользователя уже занято"),
+            validate_username]
     )
     first_name = serializers.CharField(
         required=True, max_length=MAX_LENGTH_USERNAME,
@@ -72,7 +74,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
-        user.clean()
         user.save()
         return user
 
