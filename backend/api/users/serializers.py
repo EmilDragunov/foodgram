@@ -148,12 +148,24 @@ class AddFollowSerializer(serializers.ModelSerializer):
     class Meta:
         """Мета данные."""
 
-        model = Subscription
-        fields = 'subscribed_to',
+        model = None
+        fields = ('subscribed_to', 'user')
 
-    def validate_subscribed_to(self, value):
+    @classmethod
+    def create(cls, validated_data):
+        """Создание экземпляра подписки."""
+        model = cls.Meta.model
+        return model.objects.create(**validated_data)
+
+    def validate(self, data):
         """Валидация."""
-        if value == self.context['request'].user:
+        if data['user'] == data['subscribed_to']:
             raise serializers.ValidationError(
                 'Нельзя подписаться на самого себя.')
-        return value
+        return data
+
+    def to_representation(self, instance):
+        """Возвращает сериализованные данные подписки."""
+        instance.recipes_count = instance.subscribed_to.recipes.count()
+        serializer = SubscriptionSerializer(instance, context=self.context)
+        return serializer.data
