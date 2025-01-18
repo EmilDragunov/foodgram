@@ -80,16 +80,14 @@ class UsersViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk=None):
         """Подписка на пользователя."""
-        serializer = AddFollowSerializer(data=request.data)
+        user_to_subscribe = get_object_or_404(User, pk=pk)
+        serializer = AddFollowSerializer(data={
+            'subscribed_to': user_to_subscribe.id,
+            'user': request.user.id
+        })
         serializer.is_valid(raise_exception=True)
-        return add_to_relation(
-            model=User,
-            request=request,
-            pk=pk,
-            serializer_class=AddFollowSerializer,
-            related_field='subscribed_to',
-            model_serializer=Subscription
-        )
+        serializer.save()
+        return Response(serializer.data)
 
     @subscribe.mapping.delete
     def subscribe_delete(self, request, pk=None):

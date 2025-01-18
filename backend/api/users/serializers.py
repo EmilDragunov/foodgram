@@ -148,7 +148,7 @@ class AddFollowSerializer(serializers.ModelSerializer):
     class Meta:
         """Мета данные."""
 
-        model = None
+        model = Subscription
         fields = ('subscribed_to', 'user')
 
     @classmethod
