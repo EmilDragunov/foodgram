@@ -7,13 +7,12 @@ from rest_framework.permissions import (
     IsAuthenticated, AllowAny)
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from api.utils import add_to_relation, delete_relation
+from api.utils import delete_relation
 from api.pagination import RecipePagination
 from .serializers import (
     UserSerializer, UserRegistrationSerializer,
     UserAvatarSerializer, SubscriptionSerializer, AddFollowSerializer
 )
-from users.models import Subscription
 
 User = get_user_model()
 
