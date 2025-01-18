@@ -80,6 +80,9 @@ class UsersViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated])
     def subscribe(self, request, pk=None):
         """Подписка на пользователя."""
+        serializer = AddFollowSerializer(data=request.data)
+        serializer.Meta.model = User
+        serializer.is_valid(raise_exception=True)
         return add_to_relation(
             model=User,
             request=request,
