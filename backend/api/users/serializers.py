@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from foodgram_backend.settings import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
 from users.models import Subscription
-from .validators import validate_username
+from django.core.exceptions import ValidationError
 from drf_extra_fields.fields import Base64ImageField
 
 User = get_user_model()
@@ -45,8 +45,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         required=True,
         validators=[UniqueValidator(
             queryset=User.objects.all(),
-            message="Это имя пользователя уже занято"),
-            validate_username]
+            message="Это имя пользователя уже занято"),]
     )
     first_name = serializers.CharField(
         required=True, max_length=MAX_LENGTH_USERNAME,
@@ -76,6 +75,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+    
+    def validate_username(self, value):
+        """Валидация имени пользователя с использованием метода модели."""
+        user = User(username=value)
+        try:
+            user.clean()
+        except ValidationError as e:
+            raise serializers.ValidationError(e.messages)
+        return value
 
 
 class UserAvatarSerializer(serializers.ModelSerializer):
