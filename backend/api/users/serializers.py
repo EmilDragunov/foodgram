@@ -75,7 +75,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-    
+
     def validate_username(self, value):
         """Валидация имени пользователя с использованием метода модели."""
         user = User(username=value)
