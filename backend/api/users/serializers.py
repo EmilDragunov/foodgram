@@ -72,7 +72,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
-        user.full_clean()
+        user.clean()
         user.save()
         return user
 
