@@ -73,17 +73,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
         user = User(**validated_data)
         user.set_password(password)
+        user.full_clean()
         user.save()
         return user
-
-    def validate_username(self, value):
-        """Валидация имени пользователя с использованием метода модели."""
-        user = User(username=value)
-        try:
-            user.clean()
-        except ValidationError as e:
-            raise serializers.ValidationError(e.messages)
-        return value
 
 
 class UserAvatarSerializer(serializers.ModelSerializer):
