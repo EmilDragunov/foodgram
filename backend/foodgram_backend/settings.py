@@ -11,7 +11,7 @@ MAX_LENGTH_USERNAME = 150
 MAX_LENGTH_EMAIL = 254
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://dragunfoodgram.zapto.org',
+    'https://dragunfoodgram.ru',
 ]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
